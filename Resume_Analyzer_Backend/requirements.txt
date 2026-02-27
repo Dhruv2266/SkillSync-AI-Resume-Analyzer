@@ -1,0 +1,21 @@
+# Core API
+fastapi
+uvicorn[standard]
+
+# PDF Extraction
+pdfplumber
+
+# NLP
+nltk
+
+# ML (used in Task 2)
+scikit-learn
+
+# Data
+numpy
+
+# Validation (FastAPI depends on this)
+pydantic
+
+# Production server
+python-multipart==0.0.9   # Required for FastAPI Form + File uploads
