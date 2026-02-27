@@ -143,6 +143,13 @@ export default function UploadForm({ role, isLoading, onSubmit, onBack }) {
         <p className="text-center text-slate-400 dark:text-slate-600 text-xs mt-4">
           PDF files only · Text-selectable (not scanned images)
         </p>
+
+        {/* Cold-start warning for Render free tier */}
+        <p className="text-center text-slate-400 dark:text-slate-600 text-xs mt-2 leading-relaxed max-w-sm mx-auto">
+          <span className="font-semibold">Note:</span> The AI engine is hosted on a free cloud tier.
+          If it has been inactive, your first analysis may take up to{" "}
+          <span className="font-semibold">50 seconds</span> to wake up the server.
+        </p>
       </div>
     </section>
   );

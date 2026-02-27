@@ -60,7 +60,7 @@ export default function App() {
     formData.append("job_description", jdFile);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/analyze", {
+      const response = await fetch("https://skillsync-ai-resume-analyzer.onrender.com/analyze", {
         method: "POST",
         body: formData,
       });
