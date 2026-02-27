@@ -24,9 +24,16 @@ const ROLE_META = {
 export default function UploadForm({ role, isLoading, onSubmit, onBack }) {
   const [resumeFile, setResumeFile] = useState(null);
   const [jdFile, setJdFile] = useState(null);
+  const [sizeError, setSizeError] = useState(null);  // inline size-error message
 
   const meta = ROLE_META[role];
   const canSubmit = resumeFile && jdFile && !isLoading;
+
+  // Called by either Dropzone when the chosen file exceeds 1 MB
+  const showSizeToast = (message) => {
+    setSizeError(message);
+    setTimeout(() => setSizeError(null), 5000); // auto-clear after 5 s
+  };
 
   const handleSubmit = () => {
     if (canSubmit) onSubmit(resumeFile, jdFile);
@@ -93,6 +100,7 @@ export default function UploadForm({ role, isLoading, onSubmit, onBack }) {
             icon="📄"
             file={resumeFile}
             onFileSelect={setResumeFile}
+            onFileSizeError={showSizeToast}
             disabled={isLoading}
             accentClass={meta.dropzone}
             activeClass={meta.active}
@@ -103,11 +111,35 @@ export default function UploadForm({ role, isLoading, onSubmit, onBack }) {
             icon="📋"
             file={jdFile}
             onFileSelect={setJdFile}
+            onFileSizeError={showSizeToast}
             disabled={isLoading}
             accentClass={meta.dropzone}
             activeClass={meta.active}
           />
         </motion.div>
+
+        {/* ── Size hint ────────────────────────────────────────────────────── */}
+        <p className="text-center text-slate-400 dark:text-slate-600 text-xs mt-3">
+          Max file size: <span className="font-semibold">1 MB</span>
+          <span className="mx-1.5 opacity-40">·</span>
+          Under 500 KB recommended for fastest analysis
+        </p>
+
+        {/* ── Inline size-error banner (auto-dismisses after 5 s) ──────────── */}
+        {sizeError && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mt-3 flex items-start gap-2 px-4 py-3 rounded-xl
+              bg-red-50 dark:bg-red-950/60
+              border border-red-200 dark:border-red-500/40
+              text-red-600 dark:text-red-300 text-xs leading-relaxed"
+          >
+            <span className="flex-shrink-0 mt-0.5">⚠️</span>
+            <span>{sizeError}</span>
+          </motion.div>
+        )}
 
         {/* ── Submit button ─────────────────────────────────────────────────── */}
         <motion.div
@@ -157,11 +189,24 @@ export default function UploadForm({ role, isLoading, onSubmit, onBack }) {
 
 // ── Dropzone sub-component ─────────────────────────────────────────────────
 
-function Dropzone({ label, sublabel, icon, file, onFileSelect, disabled, accentClass, activeClass }) {
+function Dropzone({ label, sublabel, icon, file, onFileSelect, onFileSizeError, disabled, accentClass, activeClass }) {
   const [isDragging, setIsDragging] = useState(false);
 
+  const MAX_FILE_SIZE = 1_048_576; // 1 MB in bytes
+
   const handleFile = (f) => {
-    if (f && f.type === "application/pdf") onFileSelect(f);
+    if (!f) return;
+
+    if (f.type !== "application/pdf") return;
+
+    if (f.size > MAX_FILE_SIZE) {
+      onFileSizeError(
+        "File is too large. Please upload a standard text-based PDF under 1MB."
+      );
+      return;
+    }
+
+    onFileSelect(f);
   };
 
   const onDrop = useCallback(
